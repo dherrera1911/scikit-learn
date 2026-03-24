@@ -274,11 +274,13 @@ def test_lda_coefs():
 def test_lda_transform():
     # Test LDA transform.
     clf = LinearDiscriminantAnalysis(solver="svd", n_components=1)
-    X_transformed = clf.fit(X, y).transform(X)
-    assert X_transformed.shape[1] == 1
+    X_transformed_svd = clf.fit(X, y).transform(X)
+    assert X_transformed_svd.shape[1] == 1
     clf = LinearDiscriminantAnalysis(solver="eigen", n_components=1)
-    X_transformed = clf.fit(X, y).transform(X)
-    assert X_transformed.shape[1] == 1
+    X_transformed_eigen = clf.fit(X, y).transform(X)
+    assert X_transformed_eigen.shape[1] == 1
+
+    assert_array_almost_equal(X_transformed_svd, X_transformed_eigen)
 
     clf = LinearDiscriminantAnalysis(solver="lsqr", n_components=1)
     clf.fit(X, y)
