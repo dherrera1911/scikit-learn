@@ -317,7 +317,8 @@ def test_lda_explained_variance_ratio():
     )
 
 
-def test_lda_orthogonality():
+@pytest.mark.parametrize("solver", ["svd", "eigen"])
+def test_lda_orthogonality(solver):
     # arrange four classes with their means in a kite-shaped pattern
     # the longer distance should be transformed to the first component, and
     # the shorter distance to the second component.
@@ -340,7 +341,7 @@ def test_lda_orthogonality():
     y = np.repeat(np.arange(means.shape[0]), scatter.shape[0])
 
     # Fit LDA and transform the means
-    clf = LinearDiscriminantAnalysis(solver="svd").fit(X, y)
+    clf = LinearDiscriminantAnalysis(solver=solver).fit(X, y)
     means_transformed = clf.transform(means)
 
     d1 = means_transformed[3] - means_transformed[0]
@@ -349,7 +350,9 @@ def test_lda_orthogonality():
     d2 /= np.sqrt(np.sum(d2**2))
 
     # the transformed ML within-class covariance should be the identity matrix
-    assert_almost_equal(np.cov(clf.transform(scatter).T, bias=True), np.eye(2))
+    transformed = clf.transform(scatter)
+    _, out_dim = transformed.shape
+    assert_almost_equal(np.cov(transformed.T, bias=True), np.eye(out_dim))
 
     # the means of classes 0 and 3 should lie on the first component
     assert_almost_equal(np.abs(np.dot(d1[:2], [1, 0])), 1.0)
